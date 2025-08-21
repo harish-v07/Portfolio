@@ -1,7 +1,53 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { FaLinkedin, FaGithub, FaEnvelope, FaPhone } from 'react-icons/fa';
 
 const Contact = () => {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    message: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch('https://getform.io/f/akkpyzga', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+      });
+
+      if (response.ok) {
+        alert('Message submitted successfully!');
+        // Reset form
+        setFormData({
+          name: '',
+          email: '',
+          message: ''
+        });
+      } else {
+        alert('Failed to submit message. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Failed to submit message. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div id='contact' className='w-full py-20 bg-[#0a192f] flex justify-center items-center p-4'>
       <div className='max-w-[1000px] w-full'>
@@ -90,7 +136,7 @@ const Contact = () => {
           {/* Right Side: Contact Form */}
           <div className='bg-[#112240] p-8 rounded-xl border border-gray-800 shadow-2xl'>
             <h3 className='text-2xl font-bold text-white mb-6'>Send Message</h3>
-            <form action="https://getform.io/f/akkpyzga" method="POST" className='flex flex-col space-y-6'>
+            <form onSubmit={handleSubmit} className='flex flex-col space-y-6'>
               <div>
                 <label className='block text-gray-400 text-sm font-medium mb-2'>Name</label>
                 <input 
@@ -98,6 +144,8 @@ const Contact = () => {
                   type="text" 
                   placeholder='Your Name' 
                   name='name' 
+                  value={formData.name}
+                  onChange={handleChange}
                   required 
                 />
               </div>
@@ -109,6 +157,8 @@ const Contact = () => {
                   type="email" 
                   placeholder='Your Email' 
                   name='email' 
+                  value={formData.email}
+                  onChange={handleChange}
                   required 
                 />
               </div>
@@ -120,15 +170,23 @@ const Contact = () => {
                   name="message" 
                   rows="6" 
                   placeholder='Your Message' 
+                  value={formData.message}
+                  onChange={handleChange}
                   required
                 ></textarea>
               </div>
               
-              <button className='w-full bg-[#ff6b35] hover:bg-[#ff6b35]/90 text-white font-semibold py-4 rounded-lg transition-all duration-300 shadow-lg hover:shadow-[#ff6b35]/25 hover:scale-[1.02] flex items-center justify-center space-x-2'>
-                <span>Send</span>
-                <svg className='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 19l9 2-9-18-9 18 9-2zm0 0v-8' />
-                </svg>
+              <button 
+                type="submit"
+                disabled={isSubmitting}
+                className='w-full bg-[#ff6b35] hover:bg-[#ff6b35]/90 disabled:bg-[#ff6b35]/50 disabled:cursor-not-allowed text-white font-semibold py-4 rounded-lg transition-all duration-300 shadow-lg hover:shadow-[#ff6b35]/25 hover:scale-[1.02] flex items-center justify-center space-x-2'
+              >
+                <span>{isSubmitting ? 'Sending...' : 'Send'}</span>
+                {!isSubmitting && (
+                  <svg className='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                    <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 19l9 2-9-18-9 18 9-2zm0 0v-8' />
+                  </svg>
+                )}
               </button>
             </form>
           </div>
@@ -137,7 +195,5 @@ const Contact = () => {
     </div>
   );
 };
-
-// To make the form work, sign up for a free account at getform.io and replace 'your-unique-endpoint' with the URL they provide.
 
 export default Contact;
